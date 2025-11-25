@@ -1,19 +1,28 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
+import MemberManagement from "./pages/MemberManagement";
+import NewMember from "./pages/NewMember";
+import MemberEdit from "./pages/MemberEdit";
+import MemberAttendance from "./pages/MemberAttendance";
 import './App.css'
-import Header from "./components/Header.tsx";
-import Content from "./components/Content.tsx";
+import Attendance from "./pages/Attendance.tsx";
 
 function App() {
-
   return (
-    <>
-    <div className="bg-background-light dark:bg-background-dark font-display">
-        <div className="relative flex h-screen w-full flex-col overflow-hidden">
-            <Header/>
-            <Content/>
-        </div>
-    </div>
-    </>
-  )
+      <BrowserRouter>
+          <Routes>
+              <Route path="/" element={<Attendance />} />
+              <Route path="/manage" element={<Layout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="members" element={<MemberManagement />} />
+                  <Route path="members/new" element={<NewMember />} />
+                  <Route path="members/:id" element={<MemberEdit />} />
+                  <Route path="attendance" element={<MemberAttendance />} />
+              </Route>
+          </Routes>
+      </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
