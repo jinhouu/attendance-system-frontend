@@ -1,6 +1,6 @@
 import './Belt.css';
 
-function Belt({belt,grau}: { belt: string, grau: string}) {
+function Belt({belt,grau}: { belt: string, grau: number}) {
 
     const renderGrau = () => {
         return (
