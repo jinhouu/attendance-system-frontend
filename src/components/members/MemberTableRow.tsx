@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
-import BeltBadge from "../ui/BeltBadge";
+import type { BeltType } from "../ui/BeltBadge";
 import StatusBadge from "../ui/StatusBadge";
 
 interface MemberTableRowProps {
     id: number;
     name: string;
-    belt: string;
+    belt: BeltType;
     contact: string;
     status: 'active' | 'expiring' | 'expired';
     registrationDate: string;
@@ -29,7 +29,7 @@ const MemberTableRow = ({
                 {name}
             </td>
             <td className="px-4 py-4">
-                <BeltBadge belt={belt as any} />
+                <BeltBadge belt={belt} />
             </td>
             <td className="px-4 py-4 text-sm text-gray-500 dark:text-[#92adc9]">
                 {contact}

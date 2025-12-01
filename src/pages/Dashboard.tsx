@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import StatCard from "../components/ui/StatCard";
 import PageHeading from "../components/ui/PageHeading";
@@ -6,61 +6,52 @@ import MemberListItem from "../components/members/MemberListItem";
 import SvgIcon from "@mui/material/SvgIcon";
 import AddIcon from '@mui/icons-material/Add';
 import ChecklistIcon from '@mui/icons-material/Checklist';
-
-interface DashboardStats {
-    todayAttendance: number;
-    totalMembers: number;
-    newMembersThisWeek: number;
-    expiringMembers: number;
-}
-
-interface RecentMember {
-    name: string;
-    belt: string;
-    time: string;
-    avatar: string;
-}
+import type { DashboardStats, RecentMember } from "../types/dashboard";
+import api from "../services/api";
 
 const Dashboard = () => {
-    const [stats] = useState<DashboardStats>({
-        todayAttendance: 34,
-        totalMembers: 152,
-        newMembersThisWeek: 5,
-        expiringMembers: 8
-    });
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [recentMembers, setRecentMembers] = useState<RecentMember[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const [recentMembers] = useState<RecentMember[]>([
-        {
-            name: "박준형",
-            belt: "블루 벨트",
-            time: "오후 8:32",
-            avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCRJiw34vikSO1ljzQTNzhIGNTZ-wAkJeczvvNBTI33M_ObsfJ2ybyxBh2xIMybGdQOqruwTirB3LPWYDyachVXl1YF1tz-7Oxh87ZLEW9qRWbcK2-MCQS3uO_mAMWOIYFYM1KmiH_fREfWuavL7lFQzNAr5Dhb0HnpXgF4jFXO9JLL4UDqvevC8ZxiflL_9CDkuVbnMxuwqLYt0iFXE_fed47hx3fn43o0M8dM6EKZlU95-5Jtx0yKYe3Mwtxep4WIV_FpruDQuck"
-        },
-        {
-            name: "이하나",
-            belt: "화이트 벨트",
-            time: "오후 8:31",
-            avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuAHDCnBe4bDcNWlQoJ0ef6Jqwg3QiZSzVhfFDR3zZsDVR8AQxSrkBTHmaMD_pIQcVOEWHhfvy9pk4iMysrrCeLtxOHbSQ5hfUN7Bi3bgPJwvWoIbymb9i31AI1-Q_1nM4wQ_qiuLYCz7QLXV3i_Mn003lkrlKDC0UWD9yP6NC5pY9PtxIjiApUHMBvnsF61VtFO9Ojp6dNErFE2MhkPcKS0qu_WRcXgH8MGvW5WIzNjhN9Rhmb0BYn5yfLP29eikc2k96RSQXp5fN8"
-        },
-        {
-            name: "최민수",
-            belt: "퍼플 벨트",
-            time: "오후 8:29",
-            avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuC918KINS4ym1PR1BXDdwvzQLYc2unnWaRjwy6-rh_Tkv-dXABBfe_FcRCQDSal3KhqVR-v87a_Cm-O2nA8o_JCtj75UysMkP-vVLZZ_A66y3mfVDi3R0-fj19FKzoKxCyn-ovJUT16BSEiztRXncqHDlRHREASbZGD7z01AjtzjzSaly4nkVkKkOauzSxskXlzxGhKPPdvAZeENrv9wibJAfGpZlgjsLcFREK6Lb0sruodvLrFAX3u7xoQWu6ydfusl8KIt39bELk"
-        },
-        {
-            name: "정수빈",
-            belt: "화이트 벨트",
-            time: "오후 8:25",
-            avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCC-5OZQj1hB5oGJxYkG_R8scNDn5Er6Hig_l9Q-rwwtLgXsjhmlnicXZDlFv2t87pOWKhmoO2UI71NbrXSqumjrzmo5AoQcPxhKplXRoCFVfo9HWaRRd6q1VDYy5RBP6Ctsci5Dh04oVDrD1DeknE4GM5Et4nmdfpNxLNwPz5OibCJfAu9lO9TB_QZY6lshXUuZPBkiLfeE6ibzyLRGv8_PyjVmDMIdx1u8XsUQQypIj9LiaquTyGJzhvbfjIjIR8_dune1Lh1eCI"
-        },
-        {
-            name: "김지영",
-            belt: "블루 벨트",
-            time: "오후 8:22",
-            avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDGy46cJBY3r1S732TRJ7Nr7iLyg7EwvMAv5IPbYgXoouZ9PWf7TEDns63mNYM5PvSh8ZG9Jgwrr-zsJZ4ys5ADzgz2Jxklhpm3OjLdmCdZ6GCOp0mVFXkg2iAoffYocgw4HCxQXRXncpi98Jmkj8vhVBuOgfbAPkaPGNBhGIH5Ixyxn049qKzukY-UMEYQy6nYI3bLqnxTU9a5BwkJQxpdlR-jAEaMYFLgx0G46wA6GaLkNmdjfugyf_ULL9DD6cGPSb7tiN-V4hM"
-        }
-    ]);
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
+                const [statsResponse, recentMembersResponse] = await Promise.all([
+                    api.get<DashboardStats>("/dashboard/stats"),
+                    api.get<RecentMember[]>("/dashboard/recent-members"),
+                ]);
+                setStats(statsResponse.data);
+                setRecentMembers(recentMembersResponse.data);
+            } catch (err) {
+                setError("대시보드 데이터를 불러오는 데 실패했습니다.");
+                console.error("Failed to fetch dashboard data:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
+    if (loading) {
+        return <div className="p-8">로딩 중...</div>;
+    }
+
+    if (error) {
+        return <div className="p-8 text-red-500">{error}</div>;
+    }
+
+    if (!stats) {
+        return <div className="p-8 text-red-500">데이터를 찾을 수 없습니다.</div>;
+    }
+
+
+
+
+
 
     return (
         <div className="p-8">

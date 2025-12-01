@@ -1,4 +1,4 @@
-type BeltType = 'white' | 'blue' | 'purple' | 'brown' | 'black' | '화이트' | '블루' | '퍼플' | '브라운' | '블랙';
+export type BeltType = 'white' | 'blue' | 'purple' | 'brown' | 'black' | '화이트' | '블루' | '퍼플' | '브라운' | '블랙';
 
 interface BeltBadgeProps {
     belt: BeltType;

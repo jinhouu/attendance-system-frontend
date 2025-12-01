@@ -1,7 +1,8 @@
-import Belt from "../Belt.tsx";
 import {useEffect, useState} from "react";
-import axios from "axios";
+import api from "../../services/api";
 import type {Member} from "../../types/member.ts";
+import type {RawDailyAttendanceMember} from "../../types/attendance.ts";
+import Belt from "../Belt.tsx";
 
 const DailyList = () => {
 
@@ -10,10 +11,10 @@ const DailyList = () => {
 
 
     useEffect(() => {
-        axios.get('/api/v1/attendances/daily')
+        api.get('/attendances/daily')
             .then(response => {
                 console.log(response.data);
-                const data: Member[] = response.data.map( (member: any) => ({
+                const data: Member[] = response.data.map( (member: RawDailyAttendanceMember) => ({
                     id:member.memberInfo.id,
                     name: member.memberInfo.name,
                     belt: member.memberInfo.belt.belt.toLowerCase(),

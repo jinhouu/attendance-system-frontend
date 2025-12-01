@@ -1,8 +1,10 @@
-
 export type Member = {
-    id: string;
+    id: number;
     name: string;
     belt: string;
-    grau: number;
-    time: string;
+    contact: string;
+    status: 'active' | 'expiring' | 'expired';
+    registrationDate: string;
+    grau?: number;
+    time?: string;
 }
