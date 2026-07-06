@@ -1,5 +1,6 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
-import type { BeltType } from "../ui/BeltBadge";
+import BeltBadge, { type BeltType } from "../ui/BeltBadge";
 import StatusBadge from "../ui/StatusBadge";
 
 interface MemberTableRowProps {
@@ -13,7 +14,7 @@ interface MemberTableRowProps {
     onDelete?: () => void;
 }
 
-const MemberTableRow = ({
+const MemberTableRow = memo(({
     id,
     name,
     belt,
@@ -51,7 +52,7 @@ const MemberTableRow = ({
                         </span>
                     </button>
                     <Link
-                        to={`/members/${id}`}
+                        to={`/manage/members/${id}`}
                         className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-primary/20 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors"
                     >
                         <span className="material-symbols-outlined text-base">
@@ -70,6 +71,8 @@ const MemberTableRow = ({
             </td>
         </tr>
     );
-};
+});
+
+MemberTableRow.displayName = "MemberTableRow";
 
 export default MemberTableRow;

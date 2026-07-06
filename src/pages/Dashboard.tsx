@@ -61,7 +61,7 @@ const Dashboard = () => {
                 description="체육관 활동 및 주요 지표 개요입니다."
                 actions={
                     <>
-                        <Link to="/members/new"
+                        <Link to="/manage/members/new"
                             className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary/90" >
                             <SvgIcon component={AddIcon} />
                             신규 회원 등록

@@ -1,3 +1,5 @@
+import type { ApiMember } from "./member.ts";
+
 export interface RawDailyAttendanceMember {
     memberInfo: {
         id: number;
@@ -9,3 +11,10 @@ export interface RawDailyAttendanceMember {
     };
     time: string;
 }
+
+export type ApiAttendance = {
+    id: number;
+    timestamp: string;
+    time: string;
+    memberInfo: ApiMember;
+};

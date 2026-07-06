@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import PageHeading from "../components/ui/PageHeading";
 import SearchBar from "../components/ui/SearchBar";
 import FilterButton from "../components/ui/FilterButton";
@@ -7,11 +7,15 @@ import MemberTableRow from "../components/members/MemberTableRow";
 import Pagination from "../components/ui/Pagination";
 import type { Member } from "../types/member";
 import api from "../services/api";
+import { mapApiMember } from "../services/memberMapper";
+import type { ApiMember } from "../types/member";
+
+const ITEMS_PER_PAGE = 5;
 
 const MemberManagement = () => {
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-
     const [members, setMembers] = useState<Member[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -20,8 +24,8 @@ const MemberManagement = () => {
         const fetchMembers = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<Member[]>("/members");
-                setMembers(response.data);
+                const response = await api.get<ApiMember[]>("/members");
+                setMembers(response.data.map(mapApiMember));
             } catch (err) {
                 setError("회원 목록을 불러오는 데 실패했습니다.");
                 console.error("Failed to fetch members:", err);
@@ -32,6 +36,28 @@ const MemberManagement = () => {
 
         fetchMembers();
     }, []);
+
+    const filteredMembers = useMemo(
+        () =>
+            members.filter((member) =>
+                member.name.toLowerCase().includes(searchQuery.toLowerCase()),
+            ),
+        [members, searchQuery],
+    );
+
+    const totalPages = Math.max(1, Math.ceil(filteredMembers.length / ITEMS_PER_PAGE));
+    const visibleMembers = useMemo(
+        () =>
+            filteredMembers.slice(
+                (currentPage - 1) * ITEMS_PER_PAGE,
+                currentPage * ITEMS_PER_PAGE,
+            ),
+        [currentPage, filteredMembers],
+    );
+
+    const handleView = useCallback((id: number) => {
+        navigate(`/manage/members/${id}`);
+    }, [navigate]);
 
     if (loading) {
         return <div className="w-full max-w-7xl mx-auto p-6">로딩 중...</div>;
@@ -49,7 +75,7 @@ const MemberManagement = () => {
                 title="회원 관리"
                 actions={
                     <Link
-                        to="/members/new"
+                        to="/manage/members/new"
                         className="flex items-center justify-center gap-2 rounded-lg h-11 px-5 bg-primary text-white text-sm font-bold leading-normal shadow-sm hover:bg-primary/90 transition-colors"
                     >
                         <span className="material-symbols-outlined">add</span>
@@ -64,7 +90,10 @@ const MemberManagement = () => {
                         <SearchBar
                             placeholder="이름으로 검색"
                             value={searchQuery}
-                            onChange={setSearchQuery}
+                            onChange={(value) => {
+                                setSearchQuery(value);
+                                setCurrentPage(1);
+                            }}
                         />
                     </div>
                     <div>
@@ -122,7 +151,7 @@ const MemberManagement = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {members.map((member) => (
+                            {visibleMembers.map((member) => (
                                 <MemberTableRow
                                     key={member.id}
                                     id={member.id}
@@ -131,7 +160,7 @@ const MemberManagement = () => {
                                     contact={member.contact}
                                     status={member.status}
                                     registrationDate={member.registrationDate}
-                                    onView={() => console.log('View member:', member.id)}
+                                    onView={() => handleView(member.id)}
                                     onDelete={() => console.log('Delete member:', member.id)}
                                 />
                             ))}
@@ -141,10 +170,10 @@ const MemberManagement = () => {
                 {/* Pagination */}
                 <Pagination
                     currentPage={currentPage}
-                    totalPages={8}
+                    totalPages={totalPages}
                     onPageChange={setCurrentPage}
-                    totalItems={20}
-                    itemsPerPage={5}
+                    totalItems={filteredMembers.length}
+                    itemsPerPage={ITEMS_PER_PAGE}
                 />
             </div>
         </div>

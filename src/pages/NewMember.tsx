@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import FormField from "../components/ui/FormField";
+import api from "../services/api";
+import { beltOptions, toApiBelt } from "../services/memberMapper";
+import type { MemberRegisterPayload } from "../types/member";
 
 interface MemberFormData {
+    code: string;
     name: string;
     contact: string;
     belt: string;
+    grau: number;
     startDate: string;
-    payment: string;
     notes: string;
 }
 
@@ -15,21 +19,42 @@ const NewMember = () => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState<MemberFormData>({
+        code: "",
         name: "",
         contact: "",
         belt: "화이트",
+        grau: 0,
         startDate: "",
-        payment: "",
-        notes: ""
+        notes: "",
     });
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        console.log("Form submitted:", formData);
-        // Handle form submission here
+
+        const payload: MemberRegisterPayload = {
+            code: formData.code,
+            name: formData.name,
+            belt: toApiBelt(formData.belt),
+            grau: formData.grau,
+            phone: formData.contact.replaceAll("-", ""),
+        };
+
+        try {
+            setSubmitting(true);
+            setError(null);
+            await api.post("/members", payload);
+            navigate("/manage/members");
+        } catch (err) {
+            console.error("Failed to register member:", err);
+            setError("회원 등록에 실패했습니다. 입력 값을 확인해주세요.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
-    const updateField = (field: keyof MemberFormData, value: string) => {
+    const updateField = (field: keyof MemberFormData, value: string | number) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
@@ -52,7 +77,20 @@ const NewMember = () => {
                     </p>
                 </div>
                 <form className="p-6" onSubmit={handleSubmit}>
+                    {error && (
+                        <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                            {error}
+                        </p>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                            label="회원번호"
+                            type="text"
+                            id="code"
+                            placeholder="숫자 4자리"
+                            value={formData.code}
+                            onChange={(value) => updateField('code', value)}
+                        />
                         {/* 이름 */}
                         <FormField
                             label="이름"
@@ -78,7 +116,16 @@ const NewMember = () => {
                             id="belt"
                             value={formData.belt}
                             onChange={(value) => updateField('belt', value)}
-                            options={["화이트", "블루", "퍼플", "브라운", "블랙"]}
+                            options={beltOptions}
+                        />
+                        <FormField
+                            label="그라우 (0-4)"
+                            type="number"
+                            id="grau"
+                            value={formData.grau}
+                            onChange={(value) => updateField('grau', Number(value))}
+                            min="0"
+                            max="4"
                         />
                         {/* 회원권 시작일 */}
                         <FormField
@@ -87,16 +134,6 @@ const NewMember = () => {
                             id="start-date"
                             value={formData.startDate}
                             onChange={(value) => updateField('startDate', value)}
-                        />
-                        {/* 결제 정보 */}
-                        <FormField
-                            label="결제 정보 (선택)"
-                            type="text"
-                            id="payment"
-                            placeholder="등록비, 회비 등"
-                            value={formData.payment}
-                            onChange={(value) => updateField('payment', value)}
-                            className="md:col-span-2"
                         />
                         {/* 특이사항 (메모) */}
                         <FormField
@@ -121,9 +158,10 @@ const NewMember = () => {
                         </button>
                         <button
                             className="px-6 py-3 rounded-lg text-sm font-bold text-white bg-primary hover:bg-primary/90 transition-colors"
+                            disabled={submitting}
                             type="submit"
                         >
-                            등록하기
+                            {submitting ? "등록 중..." : "등록하기"}
                         </button>
                     </div>
                 </form>

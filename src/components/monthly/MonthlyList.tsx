@@ -4,31 +4,31 @@ function MonthlyList() {
 
     interface MonthlyUser {
         id: string;
-        order: string;
+        order: number;
         name: string;
         belt: string;
-        grau: string;
-        count: string;
+        grau: number;
+        count: number;
         registerDate: string;
     }
 
     const userInfo: MonthlyUser[] = [
         {
             "id": "1",
-            "order": "1",
+            "order": 1,
             "name": "한진호",
             "belt": "blue",
-            "grau": "1",
-            "count": "22",
+            "grau": 1,
+            "count": 22,
             registerDate: "2023-03-15",
         },
         {
             "id": "2",
-            "order": "2",
+            "order": 2,
             "name": "이다희",
             "belt": "white",
-            "grau": "4",
-            "count": "15",
+            "grau": 4,
+            "count": 15,
             registerDate: "2023-03-15",
         },
     ];
