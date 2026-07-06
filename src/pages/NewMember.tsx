@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import FormField from "../components/ui/FormField";
-import api from "../services/api";
-import { beltOptions, toApiBelt } from "../services/memberMapper";
+import { registerMember } from "../api/members";
+import { beltOptions, toApiBelt } from "../utils/memberMapper";
 import type { MemberRegisterPayload } from "../types/member";
 
 interface MemberFormData {
@@ -44,7 +44,7 @@ const NewMember = () => {
         try {
             setSubmitting(true);
             setError(null);
-            await api.post("/members", payload);
+            await registerMember(payload);
             navigate("/manage/members");
         } catch (err) {
             console.error("Failed to register member:", err);

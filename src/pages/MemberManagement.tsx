@@ -6,9 +6,8 @@ import FilterButton from "../components/ui/FilterButton";
 import MemberTableRow from "../components/members/MemberTableRow";
 import Pagination from "../components/ui/Pagination";
 import type { Member } from "../types/member";
-import api from "../services/api";
-import { mapApiMember } from "../services/memberMapper";
-import type { ApiMember } from "../types/member";
+import { getMembers } from "../api/members";
+import { mapApiMember } from "../utils/memberMapper";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -24,8 +23,8 @@ const MemberManagement = () => {
         const fetchMembers = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<ApiMember[]>("/members");
-                setMembers(response.data.map(mapApiMember));
+                const membersData = await getMembers();
+                setMembers(membersData.map(mapApiMember));
             } catch (err) {
                 setError("회원 목록을 불러오는 데 실패했습니다.");
                 console.error("Failed to fetch members:", err);

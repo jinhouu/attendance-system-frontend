@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import FormField from "../components/ui/FormField";
-import api from "../services/api";
-import { beltOptions, mapApiMember, toApiBelt } from "../services/memberMapper";
-import type { ApiMember, MemberUpdatePayload } from "../types/member";
+import { getMember, updateMember } from "../api/members";
+import { beltOptions, mapApiMember, toApiBelt } from "../utils/memberMapper";
+import type { MemberUpdatePayload } from "../types/member";
 
 interface MemberData {
     code: string;
@@ -46,8 +46,7 @@ const MemberEdit = () => {
 
             try {
                 setLoading(true);
-                const response = await api.get<ApiMember>(`/members/${id}`);
-                const member = mapApiMember(response.data);
+                const member = mapApiMember(await getMember(id));
 
                 setMemberData({
                     code: member.code,
@@ -91,7 +90,7 @@ const MemberEdit = () => {
         try {
             setSaving(true);
             setError(null);
-            await api.put(`/members/${id}`, payload);
+            await updateMember(id, payload);
             navigate("/manage/members");
         } catch (err) {
             console.error("Failed to update member:", err);

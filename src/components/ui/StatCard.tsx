@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 interface StatCardProps {
     title: string;
     value: string | number;
@@ -5,7 +7,7 @@ interface StatCardProps {
     iconColor?: string;
 }
 
-const StatCard = ({ title, value, icon, iconColor = "text-primary" }: StatCardProps) => {
+const StatCard = memo(({ title, value, icon, iconColor = "text-primary" }: StatCardProps) => {
     return (
         <div className="flex flex-col gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
             {icon && (
@@ -21,6 +23,8 @@ const StatCard = ({ title, value, icon, iconColor = "text-primary" }: StatCardPr
             </p>
         </div>
     );
-};
+});
+
+StatCard.displayName = "StatCard";
 
 export default StatCard;

@@ -1,6 +1,5 @@
 import { memo, useEffect, useMemo, useState } from "react";
-import api from "../../services/api";
-import type { ApiAttendance } from "../../types/attendance.ts";
+import { getDailyAttendances } from "../../api/attendance.ts";
 import Belt from "../Belt.tsx";
 
 type DailyMember = {
@@ -20,8 +19,8 @@ const DailyList = memo(() => {
         const fetchDailyAttendance = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<ApiAttendance[]>('/attendances/daily');
-                setDailyList(response.data.map((attendance) => ({
+                const attendances = await getDailyAttendances();
+                setDailyList(attendances.map((attendance) => ({
                     id: attendance.memberInfo.id,
                     name: attendance.memberInfo.name,
                     belt: attendance.memberInfo.belt.belt.toLowerCase(),

@@ -1,3 +1,5 @@
+import { memo, useCallback, useMemo } from "react";
+
 interface PaginationProps {
     currentPage: number;
     totalPages: number;
@@ -15,18 +17,22 @@ const Pagination = ({
 }: PaginationProps) => {
     const startItem = (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, totalItems || 0);
+    const pageNumbers = useMemo(
+        () => Array.from({ length: Math.min(totalPages, 3) }, (_, i) => i + 1),
+        [totalPages],
+    );
 
-    const handlePrevious = () => {
+    const handlePrevious = useCallback(() => {
         if (currentPage > 1) {
             onPageChange(currentPage - 1);
         }
-    };
+    }, [currentPage, onPageChange]);
 
-    const handleNext = () => {
+    const handleNext = useCallback(() => {
         if (currentPage < totalPages) {
             onPageChange(currentPage + 1);
         }
-    };
+    }, [currentPage, onPageChange, totalPages]);
 
     return (
         <div className="flex items-center justify-between mt-6 px-4">
@@ -44,7 +50,7 @@ const Pagination = ({
                     <span className="material-symbols-outlined">chevron_left</span>
                 </button>
 
-                {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => i + 1).map((page) => (
+                {pageNumbers.map((page) => (
                     <button
                         key={page}
                         className={`flex items-center justify-center size-9 rounded-lg ${page === currentPage
@@ -83,4 +89,4 @@ const Pagination = ({
     );
 };
 
-export default Pagination;
+export default memo(Pagination);

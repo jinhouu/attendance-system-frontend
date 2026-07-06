@@ -7,7 +7,17 @@ import SvgIcon from "@mui/material/SvgIcon";
 import AddIcon from '@mui/icons-material/Add';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import type { DashboardStats, RecentMember } from "../types/dashboard";
-import api from "../services/api";
+import { getDashboardStats, getRecentMembers } from "../api/dashboard";
+
+const weeklyAttendanceBars = [
+    { day: "월", height: "100%", active: false },
+    { day: "화", height: "70%", active: false },
+    { day: "수", height: "80%", active: false },
+    { day: "목", height: "40%", active: false },
+    { day: "금", height: "90%", active: false },
+    { day: "토", height: "75%", active: true },
+    { day: "일", height: "50%", active: false },
+];
 
 const Dashboard = () => {
     const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -19,12 +29,12 @@ const Dashboard = () => {
         const fetchDashboardData = async () => {
             try {
                 setLoading(true);
-                const [statsResponse, recentMembersResponse] = await Promise.all([
-                    api.get<DashboardStats>("/dashboard/stats"),
-                    api.get<RecentMember[]>("/dashboard/recent-members"),
+                const [statsData, recentMembersData] = await Promise.all([
+                    getDashboardStats(),
+                    getRecentMembers(),
                 ]);
-                setStats(statsResponse.data);
-                setRecentMembers(recentMembersResponse.data);
+                setStats(statsData);
+                setRecentMembers(recentMembersData);
             } catch (err) {
                 setError("대시보드 데이터를 불러오는 데 실패했습니다.");
                 console.error("Failed to fetch dashboard data:", err);
@@ -99,53 +109,21 @@ const Dashboard = () => {
                             지난 7일 대비
                         </p>
                         <div className="grid min-h-[240px] flex-1 grid-flow-col grid-rows-[1fr_auto] items-end justify-items-center gap-4 pt-6">
-                            <div
-                                className="w-full rounded-t bg-primary/20"
-                                style={{ height: "100%" }}
-                            ></div>
-                            <div
-                                className="w-full rounded-t bg-primary/20"
-                                style={{ height: "70%" }}
-                            ></div>
-                            <div
-                                className="w-full rounded-t bg-primary/20"
-                                style={{ height: "80%" }}
-                            ></div>
-                            <div
-                                className="w-full rounded-t bg-primary/20"
-                                style={{ height: "40%" }}
-                            ></div>
-                            <div
-                                className="w-full rounded-t bg-primary/20"
-                                style={{ height: "90%" }}
-                            ></div>
-                            <div
-                                className="w-full rounded-t bg-primary"
-                                style={{ height: "75%" }}
-                            ></div>
-                            <div
-                                className="w-full rounded-t bg-primary/20"
-                                style={{ height: "50%" }}
-                            ></div>
-                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                월
-                            </p>
-                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                화
-                            </p>
-                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                수
-                            </p>
-                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                목
-                            </p>
-                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                금
-                            </p>
-                            <p className="text-sm font-bold text-primary">토</p>
-                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                일
-                            </p>
+                            {weeklyAttendanceBars.map((bar) => (
+                                <div
+                                    className={`w-full rounded-t ${bar.active ? "bg-primary" : "bg-primary/20"}`}
+                                    key={`${bar.day}-bar`}
+                                    style={{ height: bar.height }}
+                                ></div>
+                            ))}
+                            {weeklyAttendanceBars.map((bar) => (
+                                <p
+                                    className={bar.active ? "text-sm font-bold text-primary" : "text-sm font-medium text-slate-500 dark:text-slate-400"}
+                                    key={`${bar.day}-label`}
+                                >
+                                    {bar.day}
+                                </p>
+                            ))}
                         </div>
                     </div>
                 </div>

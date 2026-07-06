@@ -1,13 +1,13 @@
 import axios from "axios";
 
-const api = axios.create({
+const http = axios.create({
     baseURL: "/api",
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-api.interceptors.response.use((response) => {
+http.interceptors.response.use((response) => {
     if (
         response.data &&
         typeof response.data === "object" &&
@@ -19,4 +19,4 @@ api.interceptors.response.use((response) => {
     return response;
 });
 
-export default api;
+export default http;

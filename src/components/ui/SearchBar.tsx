@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 interface SearchBarProps {
     placeholder: string;
     value: string;
@@ -5,7 +7,7 @@ interface SearchBarProps {
     className?: string;
 }
 
-const SearchBar = ({ placeholder, value, onChange, className = "" }: SearchBarProps) => {
+const SearchBar = memo(({ placeholder, value, onChange, className = "" }: SearchBarProps) => {
     return (
         <label className={`flex flex-col w-full ${className}`}>
             <div className="flex w-full flex-1 items-stretch rounded-lg h-11 bg-gray-100 dark:bg-[#233648]">
@@ -21,6 +23,8 @@ const SearchBar = ({ placeholder, value, onChange, className = "" }: SearchBarPr
             </div>
         </label>
     );
-};
+});
+
+SearchBar.displayName = "SearchBar";
 
 export default SearchBar;
